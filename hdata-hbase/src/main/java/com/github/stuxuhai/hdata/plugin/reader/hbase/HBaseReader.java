@@ -12,6 +12,8 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.github.stuxuhai.hdata.api.DefaultRecord;
 import com.github.stuxuhai.hdata.api.Fields;
@@ -31,6 +33,8 @@ public class HBaseReader extends Reader {
 	private Table table;
 	private byte[] startRowkey;
 	private byte[] endRowkey;
+	private String startTimestamp;
+	private String endTimestamp;
 	private String[] columns;
 	private int rowkeyIndex = -1;
 	private static final String ROWKEY = ":rowkey";
@@ -39,6 +43,8 @@ public class HBaseReader extends Reader {
 	public void prepare(JobContext context, PluginConfig readerConfig) {
 		startRowkey = (byte[]) readerConfig.get(HBaseReaderProperties.START_ROWKWY);
 		endRowkey = (byte[]) readerConfig.get(HBaseReaderProperties.END_ROWKWY);
+		startTimestamp = readerConfig.getString(HBaseReaderProperties.START_TIMESTAMP, "");
+		endTimestamp = readerConfig.getString(HBaseReaderProperties.END_TIMESTAMP, "");
 
 		Preconditions.checkNotNull(readerConfig.getString(HBaseReaderProperties.SCHEMA),
 				"HBase reader required property: schema");
@@ -84,6 +90,8 @@ public class HBaseReader extends Reader {
 			scan.setStopRow(endRowkey);
 		}
 
+		setTimeRange(scan);
+
 		for (int i = 0, len = columns.length; i < len; i++) {
 			if (i != rowkeyIndex) {
 				String[] column = columns[i].split(":");
@@ -123,5 +131,25 @@ public class HBaseReader extends Reader {
 	public Splitter newSplitter() {
 		return new HBaseSplitter();
 	}
+
+	public void setTimeRange(Scan scan){
+        if(startTimestamp != null && !startTimestamp.trim().isEmpty() &&
+                endTimestamp != null && !endTimestamp.trim().isEmpty()){
+            startTimestamp = startTimestamp.trim();
+            endTimestamp = endTimestamp.trim();
+
+            try {
+                LocalDateTime from = LocalDateTime.parse(startTimestamp, ISODateTimeFormat.dateTime());
+                LocalDateTime to = LocalDateTime.parse(endTimestamp, ISODateTimeFormat.dateTime());
+
+                if (from.isBefore(to)) {
+                    scan.setTimeRange(from.toDateTime().getMillis(), to.toDateTime().getMillis());
+                }
+            }
+            catch(Exception exp){
+                throw new HDataException(exp);
+            }
+        }
+    }
 
 }

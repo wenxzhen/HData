@@ -1,2 +1,5 @@
 target
-/build/
+/build/.idea
+.idea
+build
+*.iml

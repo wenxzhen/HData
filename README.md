@@ -164,6 +164,8 @@ zookeeper.client.port|否|Zookeeper客户端端口，默认：2181|
 table|是|表名|
 start.rowkey|否|Rowkey起始值|
 end.rowkey|否|Rowkey结束值|
+start.timestamp|否|start time|
+end.timestamp|否|end time|
 columns|是|读取的列，如：:rowkey,cf:start_ip,cf:end_ip|
 schema|是|输出的字段定义，如：id,start_ip,end_ip|
 zookeeper.znode.parent|否|hbase使用的Zookeeper根节点|

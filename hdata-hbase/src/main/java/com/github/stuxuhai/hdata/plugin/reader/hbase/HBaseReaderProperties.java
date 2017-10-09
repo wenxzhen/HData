@@ -10,4 +10,6 @@ public class HBaseReaderProperties {
 	public static final String COLUMNS = "columns";
 	public static final String SCHEMA = "schema";
 	public static final String ZOOKEEPER_ZNODE_PARENT = "zookeeper.znode.parent";
+	public static final String START_TIMESTAMP = "start.timestamp";
+	public static final String END_TIMESTAMP = "end.timestamp";
 }
